@@ -218,3 +218,61 @@ fine-tune所有层把--checkpoint_exclude_scopes和--trainable_scopes删掉。
 4.可视化log
 
     tensorboard --logdir train_logs/
+    
+验证
+
+官方提供了验证脚本
+
+    python eval_image_classifier.py \
+        --checkpoint_path=train_logs \
+        --eval_dir=eval_logs \
+        --dataset_name=flowers \
+        --dataset_split_name=validation \
+        --dataset_dir=../../data/flowers \
+        --model_name=inception_resnet_v2
+        
+同理，如果是自己的数据集，则需要修改models/slim/eval_image_classifier.py
+
+   把
+   from datasets import dataset_factory
+   修改为
+   from datasets import dataset_classification
+   
+   把
+   dataset = dataset_factory.get_dataset(
+    FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
+   修改为
+   dataset = dataset_classification.get_dataset(
+    FLAGS.dataset_dir, FLAGS.num_samples, FLAGS.num_classes, FLAGS.labels_to_names_path)
+    
+    在
+    tf.app.flags.DEFINE_string(
+    'dataset_dir', None, 'The directory where the dataset files are stored.')
+    后加入
+    tf.app.flags.DEFINE_integer(
+    'num_samples', 350, 'Number of samples.')
+
+    tf.app.flags.DEFINE_integer(
+        'num_classes', 5, 'Number of classes.')
+
+    tf.app.flags.DEFINE_string(
+        'labels_to_names_path', None, 'Label names file path.')
+        
+验证时执行以下命令：
+
+    python eval_image_classifier.py \
+        --checkpoint_path=train_logs \
+        --eval_dir=eval_logs \
+        --dataset_dir=../../data/val \
+        --num_samples=350 \
+        --num_classes=5 \
+        --model_name=inception_resnet_v2
+        
+可视化log命令为
+
+    tensorboard --logdir eval_logs/ --port 6007
+
+
+
+
+
