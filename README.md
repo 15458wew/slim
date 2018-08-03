@@ -40,6 +40,7 @@
     fd = open(list_path)
     lines = fd.readlines()
     fd.close()
+
     random.seed(_RANDOM_SEED)
     random.shuffle(lines)
 
@@ -100,3 +101,120 @@
     wget http://download.tensorflow.org/models/inception_resnet_v2_2016_08_30.tar.gz
     tar zxf inception_resnet_v2_2016_08_30.tar.gz
 
+训练
+
+1.读入数据，将下面代码写入models/slim/datasets/dataset_classification.py。
+
+    import os
+    import tensorflow as tf
+    slim = tf.contrib.slim
+
+    def get_dataset(dataset_dir, num_samples, num_classes, labels_to_names_path=None, file_pattern='*.tfrecord'):
+        file_pattern = os.path.join(dataset_dir, file_pattern)
+        keys_to_features = {
+            'image/encoded': tf.FixedLenFeature((), tf.string, default_value=''),
+            'image/format': tf.FixedLenFeature((), tf.string, default_value='jpg'),
+            'image/class/label': tf.FixedLenFeature(
+                [], tf.int64, default_value=tf.zeros([], dtype=tf.int64)),
+        }
+        items_to_handlers = {
+            'image': slim.tfexample_decoder.Image(),
+            'label': slim.tfexample_decoder.Tensor('image/class/label'),
+        }
+        decoder = slim.tfexample_decoder.TFExampleDecoder(keys_to_features, items_to_handlers)
+        items_to_descriptions = {
+            'image': 'A color image of varying size.',
+            'label': 'A single integer between 0 and ' + str(num_classes - 1),
+        }
+        labels_to_names = None
+        if labels_to_names_path is not None:
+            fd = open(labels_to_names_path)
+            labels_to_names = {i : line.strip() for i, line in enumerate(fd)}
+            fd.close()
+        return slim.dataset.Dataset(
+                data_sources=file_pattern,
+                reader=tf.TFRecordReader,
+                decoder=decoder,
+                num_samples=num_samples,
+                items_to_descriptions=items_to_descriptions,
+                num_classes=num_classes,
+                labels_to_names=labels_to_names)
+                
+2.构建模型
+
+官方提供了许多模型在models/slim/nets/
+
+3.开始训练
+
+官方提供的训练脚本为
+
+    CUDA_VISIBLE_DEVICES="0" python train_image_classifier.py \
+        --train_dir=train_logs \
+        --dataset_name=flowers \
+        --dataset_split_name=train \
+        --dataset_dir=../../data/flowers \
+        --model_name=inception_resnet_v2 \
+        --checkpoint_path=../../checkpoints/inception_resnet_v2_2016_08_30.ckpt \
+        --checkpoint_exclude_scopes=InceptionResnetV2/Logits,InceptionResnetV2/AuxLogits \
+        --trainable_scopes=InceptionResnetV2/Logits,InceptionResnetV2/AuxLogits \
+        --max_number_of_steps=1000 \
+        --batch_size=32 \
+        --learning_rate=0.01 \
+        --learning_rate_decay_type=fixed \
+        --save_interval_secs=60 \
+        --save_summaries_secs=60 \
+        --log_every_n_steps=10 \
+        --optimizer=rmsprop \
+        --weight_decay=0.00004
+        
+不fine-tune把--checkpoint_path, --checkpoint_exclude_scopes和--trainable_scopes删掉。
+
+fine-tune所有层把--checkpoint_exclude_scopes和--trainable_scopes删掉。
+
+如果只使用CPU则加上--clone_on_cpu=True。
+
+其它参数可删掉用默认值或自行修改。
+
+使用自己的数据则需要修改models/slim/train_image_classifier.py
+
+    把
+    from datasets import dataset_factory
+    修改为
+    from datasets import dataset_classification
+    
+    把
+    dataset = dataset_factory.get_dataset(
+    FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
+    修改为
+    dataset = dataset_classification.get_dataset(
+    FLAGS.dataset_dir, FLAGS.num_samples, FLAGS.num_classes, FLAGS.labels_to_names_path)
+    
+    在
+    tf.app.flags.DEFINE_string(
+    'dataset_dir', None, 'The directory where the dataset files are stored.')
+    后加入
+    tf.app.flags.DEFINE_integer(
+    'num_samples', 3320, 'Number of samples.')
+
+    tf.app.flags.DEFINE_integer(
+        'num_classes', 5, 'Number of classes.')
+
+    tf.app.flags.DEFINE_string(
+        'labels_to_names_path', None, 'Label names file path.')
+      
+训练时执行以下命令：
+
+    python train_image_classifier.py \
+    --train_dir=train_logs \
+    --dataset_dir=../../data/train \
+    --num_samples=3320 \
+    --num_classes=5 \
+    --labels_to_names_path=../../data/labels.txt \
+    --model_name=inception_resnet_v2 \
+    --checkpoint_path=../../checkpoints/inception_resnet_v2_2016_08_30.ckpt \
+    --checkpoint_exclude_scopes=InceptionResnetV2/Logits,InceptionResnetV2/AuxLogits \
+    --trainable_scopes=InceptionResnetV2/Logits,InceptionResnetV2/AuxLogits
+    
+4.可视化log
+
+    tensorboard --logdir train_logs/
