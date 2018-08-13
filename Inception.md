@@ -30,6 +30,11 @@ v2网络将一个5*5卷积分解为两个连续的3*3卷积，v3网络将3*3卷�
 
 Inception v4网络，Inception-ResNet系列网络
 
-该网络的改进之处就是使用上文的inception结构来替换resnet shortcut中的conv+1*1conv
+该网络的改进之处就是使用上文的inception结构来替换resnet shortcut中的conv+1*1conv(resnet中用到的结构多为3*3，3*3，或者1*1，3*3，1*1。在这里与resnet用到的结构有不同之处）
+
+resnet网络
+
+个人理解，resnet网络想要克服深层网络准确率下降的问题（例如梯度消失），如上图所示，它将输入时的特征记为x，输出的特征记为y，y-x即为学习到的东西（残差），这里残差用F（x）表示。
+
 
 
