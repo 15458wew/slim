@@ -233,17 +233,17 @@ fine-tune所有层把--checkpoint_exclude_scopes和--trainable_scopes删掉。
         
 同理，如果是自己的数据集，则需要修改models/slim/eval_image_classifier.py
 
-                   把
-                   from datasets import dataset_factory
-                   修改为
-                   from datasets import dataset_classification
+    把
+    from datasets import dataset_factory
+    修改为
+    from datasets import dataset_classification
 
-                   把
-                   dataset = dataset_factory.get_dataset(
-                    FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
-                   修改为
-                   dataset = dataset_classification.get_dataset(
-                    FLAGS.dataset_dir, FLAGS.num_samples, FLAGS.num_classes, FLAGS.labels_to_names_path)
+    把
+    dataset = dataset_factory.get_dataset(
+    FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
+    修改为
+    dataset = dataset_classification.get_dataset(
+    FLAGS.dataset_dir, FLAGS.num_samples, FLAGS.num_classes, FLAGS.labels_to_names_path)
 
     在
     tf.app.flags.DEFINE_string(
