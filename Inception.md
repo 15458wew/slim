@@ -30,3 +30,6 @@ v2网络将一个5*5卷积分解为两个连续的3*3卷积，v3网络将3*3卷�
 
 Inception v4网络，Inception-ResNet系列网络
 
+该网络的改进之处就是使用上文的inception结构来替换resnet shortcut中的conv+1*1conv
+
+
