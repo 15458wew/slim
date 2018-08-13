@@ -37,4 +37,4 @@ resnet网络
 个人理解，resnet网络想要克服深层网络准确率下降的问题（例如梯度消失），如上图所示，它将输入时的特征记为x，输出的特征记为y，y-x即为学习到的东西（残差），这里残差用F（x）表示。
 
 
-
+![image](https://github.com/15458wew/slim/blob/master/images/resnet.png)
