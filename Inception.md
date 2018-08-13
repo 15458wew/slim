@@ -38,3 +38,5 @@ resnet网络
 
 
 ![image](https://github.com/15458wew/slim/blob/master/images/resnet.png)
+
+等号右边第一项表示损失函数的梯度，小括号中1表明短路机制可以无损传播（可以理解为深层网络复制浅层网络），另外一项代表经过有卷积的层，残差梯度不会全为-1。所以可以解决梯度消失的问题。
