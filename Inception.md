@@ -20,10 +20,12 @@ Inception v1网络
 
 Inception v1结构有3个输出（类比FCN的8s，16s，32s），最后一个softmax前使用的是global average pooling
 
+
+![image](https://github.com/15458wew/slim/blob/master/images/inception2.png)
+
 Inception v2网络，Inception v3网络
 
 在输入端加入BN层，个人理解为归一化，输出为标准正态分布N（0，1）
-
 
 
 v2网络将一个5*5卷积分解为两个连续的3*3卷积，v3网络将3*3卷积分解为1*3卷积与3*1卷积。总体而言都是用更小的卷积核来替代大卷积核，增加网络深度，增加非线性
@@ -31,6 +33,8 @@ v2网络将一个5*5卷积分解为两个连续的3*3卷积，v3网络将3*3卷�
 Inception v4网络，Inception-ResNet系列网络
 
 该网络的改进之处就是使用上文的inception结构来替换resnet shortcut中的conv+1*1conv(resnet中用到的结构多为3*3，3*3，或者1*1，3*3，1*1。在这里与resnet用到的结构有不同之处）
+
+![image](https://github.com/15458wew/slim/blob/master/images/resnet2.png)
 
 resnet网络
 
